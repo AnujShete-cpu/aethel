@@ -14,12 +14,6 @@ function createSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  console.log("SUPABASE_URL =", url);
-  console.log(
-    "SERVICE_ROLE_KEY_PREFIX =",
-    key?.slice(0, 20)
-  );
-
   if (!url || !key) {
     throw new Error(
       "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
