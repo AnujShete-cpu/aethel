@@ -19,7 +19,7 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl="/login" dynamic>
       <html lang="en" suppressHydrationWarning>
         <body>
           <AppProviders>{children}</AppProviders>

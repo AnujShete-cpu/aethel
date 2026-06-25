@@ -27,6 +27,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      saves: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: "link" | "pdf" | "image" | "note";
+          title: string | null;
+          description: string | null;
+          source_url: string | null;
+          content_text: string | null;
+          file_path: string | null;
+          mime_type: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: "link" | "pdf" | "image" | "note";
+          title?: string | null;
+          description?: string | null;
+          source_url?: string | null;
+          content_text?: string | null;
+          file_path?: string | null;
+          mime_type?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: "link" | "pdf" | "image" | "note";
+          title?: string | null;
+          description?: string | null;
+          source_url?: string | null;
+          content_text?: string | null;
+          file_path?: string | null;
+          mime_type?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       user_settings: {
         Row: {
           id: string;
