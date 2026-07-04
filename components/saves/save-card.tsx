@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, ExternalLink } from "lucide-react";
+import { Trash2, ExternalLink, FolderInput } from "lucide-react";
 
 import type { Save } from "@/services/saves";
 
 type SaveCardProps = {
   save: Save;
   onDelete: (id: string) => void;
+  onMoveClick?: (save: Save) => void;
 };
 
-export function SaveCard({ save, onDelete }: SaveCardProps) {
+export function SaveCard({ save, onDelete, onMoveClick }: SaveCardProps) {
   const [deleting, setDeleting] = useState(false);
 
   const displayTitle = save.title ?? save.source_url ?? "Untitled";
@@ -71,16 +72,28 @@ export function SaveCard({ save, onDelete }: SaveCardProps) {
           <p className="mt-2 text-xs text-muted-foreground/60">{formattedDate}</p>
         </div>
 
-        {/* Delete */}
-        <button
-          type="button"
-          aria-label={`Delete ${displayTitle}`}
-          onClick={handleDelete}
-          disabled={deleting}
-          className="shrink-0 flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          <Trash2 className="size-3.5" aria-hidden="true" />
-        </button>
+        {/* Actions */}
+        <div className="flex shrink-0 items-center gap-1">
+          {onMoveClick && (
+            <button
+              type="button"
+              aria-label={`Move ${displayTitle}`}
+              onClick={() => onMoveClick(save)}
+              className="flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
+            >
+              <FolderInput className="size-3.5" aria-hidden="true" />
+            </button>
+          )}
+          <button
+            type="button"
+            aria-label={`Delete ${displayTitle}`}
+            onClick={handleDelete}
+            disabled={deleting}
+            className="flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <Trash2 className="size-3.5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </article>
   );

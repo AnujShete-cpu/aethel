@@ -7,6 +7,7 @@ export type CreateSaveInput = {
   url: string;
   title?: string | null;
   description?: string | null;
+  collectionId?: string | null;
 };
 
 export type SavesResult =
@@ -47,6 +48,20 @@ export async function createSave(
   if (error) {
     console.error("[saves] createSave error:", error);
     return { data: null, error: error.message };
+  }
+
+  if (input.collectionId) {
+    const { error: linkError } = await supabase.from("save_collections").insert({
+      user_id: userId,
+      save_id: data.id,
+      collection_id: input.collectionId,
+    });
+
+    if (linkError) {
+      // The save itself was created successfully; the collection link failing
+      // is logged but not treated as a fatal error for the save creation.
+      console.error("[saves] createSave collection link error:", linkError);
+    }
   }
 
   return { data, error: null };

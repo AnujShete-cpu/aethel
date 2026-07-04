@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { url, title, description } = body as Record<string, unknown>;
+  const { url, title, description, collectionId } = body as Record<string, unknown>;
 
   // Validate URL — required, must be a string, must be a valid URL
   if (!url || typeof url !== "string" || url.trim() === "") {
@@ -70,6 +70,14 @@ export async function POST(request: Request) {
     }
   }
 
+  // Validate optional collectionId
+  if (collectionId !== undefined && collectionId !== null && typeof collectionId !== "string") {
+    return NextResponse.json(
+      { error: "collectionId must be a string or null" },
+      { status: 400 }
+    );
+  }
+
   const result = await createSave(userId, {
     url: url.trim(),
     title: typeof title === "string" && title.trim() ? title.trim() : null,
@@ -77,6 +85,7 @@ export async function POST(request: Request) {
       typeof description === "string" && description.trim()
         ? description.trim()
         : null,
+    collectionId: typeof collectionId === "string" ? collectionId : null,
   });
 
   if (result.error) {

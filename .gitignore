@@ -1,18 +1,4 @@
-node_modules/
-.next/
-out/
 
-.env
-.env.local
-.env.*
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-.DS_Store
-Thumbs.db
-
-tsconfig.tsbuildinfo
-
-.clerk/
+# clerk configuration (can include secrets)
+/.clerk/
+.env.local 

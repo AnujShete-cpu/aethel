@@ -5,6 +5,8 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useSaveModal } from "@/providers/save-modal-provider";
+import { CollectionSelector } from "@/components/collections/collection-selector";
+import { CreateCollectionModal } from "@/components/collections/create-collection-modal";
 
 type FormState =
   | { status: "idle" }
@@ -23,6 +25,8 @@ export function SaveModal({ onSaveSuccess }: SaveModalProps) {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
+  const [collectionId, setCollectionId] = useState<string | null>(null);
+  const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
   const [formState, setFormState] = useState<FormState>({ status: "idle" });
   const urlInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +43,7 @@ export function SaveModal({ onSaveSuccess }: SaveModalProps) {
       setUrl("");
       setTitle("");
       setNotes("");
+      setCollectionId(null);
       setFormState({ status: "idle" });
     }
   }, [isOpen]);
@@ -87,6 +92,7 @@ export function SaveModal({ onSaveSuccess }: SaveModalProps) {
           url: trimmedUrl,
           title: title.trim() || null,
           description: notes.trim() || null,
+          collectionId,
         }),
       });
 
@@ -224,6 +230,17 @@ export function SaveModal({ onSaveSuccess }: SaveModalProps) {
             />
           </div>
 
+          {/* Collection */}
+          <div className="space-y-1.5">
+            <span className="block text-sm font-medium text-foreground">Collection</span>
+            <CollectionSelector
+              value={collectionId}
+              onChange={setCollectionId}
+              onCreateNew={() => setCreateCollectionOpen(true)}
+              disabled={isSubmitting}
+            />
+          </div>
+
           {/* Error message */}
           {formState.status === "error" && (
             <p role="alert" className="text-sm text-destructive">
@@ -251,6 +268,12 @@ export function SaveModal({ onSaveSuccess }: SaveModalProps) {
           </div>
         </form>
       </div>
+
+      <CreateCollectionModal
+        isOpen={createCollectionOpen}
+        onClose={() => setCreateCollectionOpen(false)}
+        onCreated={(collection) => setCollectionId(collection.id)}
+      />
     </>
   );
 }

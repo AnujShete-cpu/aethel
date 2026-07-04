@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import type { Save } from "@/services/saves";
 import { SaveCard } from "@/components/saves/save-card";
 import { SaveModal } from "@/components/saves/save-modal";
+import { MoveSaveDialog } from "@/components/collections/move-save-dialog";
 import { useSaveModal } from "@/providers/save-modal-provider";
 
 type InboxListProps = {
@@ -13,6 +14,7 @@ type InboxListProps = {
 
 export function InboxList({ initialSaves }: InboxListProps) {
   const [saves, setSaves] = useState<Save[]>(initialSaves);
+  const [moveTarget, setMoveTarget] = useState<Save | null>(null);
   const { isOpen } = useSaveModal();
 
   // Re-fetch saves from server after modal closes following a successful save.
@@ -44,6 +46,7 @@ export function InboxList({ initialSaves }: InboxListProps) {
   return (
     <>
       <SaveModal onSaveSuccess={handleSaveSuccess} />
+      <MoveSaveDialog save={moveTarget} onClose={() => setMoveTarget(null)} />
 
       {saves.length === 0 ? (
         <EmptyState />
@@ -51,7 +54,7 @@ export function InboxList({ initialSaves }: InboxListProps) {
         <ul className="space-y-3" role="list">
           {saves.map((save) => (
             <li key={save.id}>
-              <SaveCard save={save} onDelete={handleDelete} />
+              <SaveCard save={save} onDelete={handleDelete} onMoveClick={setMoveTarget} />
             </li>
           ))}
         </ul>
