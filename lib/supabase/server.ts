@@ -25,16 +25,13 @@ import type { Database } from "@/types/supabase";
  */
 export async function createSupabaseServerClient() {
   const { userId, getToken } = await auth();
- 
+
   if (!userId) {
     return createClient<Database>(env.supabaseUrl, env.supabaseAnonKey);
   }
 
   const token = await getToken();
 
- console.log("USER ID:", userId);
- console.log("TOKEN EXISTS:", !!token);
- console.log("TOKEN PREFIX:", token?.slice(0, 30));
   return createClient<Database>(env.supabaseUrl, env.supabaseAnonKey, {
     global: {
       headers: {
