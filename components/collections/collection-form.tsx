@@ -15,6 +15,21 @@ const COLOR_PRESETS = [
   "#64748B", // slate
 ] as const;
 
+const EMOJI_PRESETS = [
+  "📚",
+  "🚀",
+  "💻",
+  "🧠",
+  "⭐",
+  "🔥",
+  "📖",
+  "🎯",
+  "💡",
+  "📝",
+  "🗂️",
+  "❤️",
+] as const;
+
 export type CollectionFormValues = {
   name: string;
   description: string;
@@ -34,6 +49,13 @@ type CollectionFormProps = {
 const inputClass =
   "w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors";
 
+function getSingleEmoji(value: string) {
+  const emojiRegex = /\p{Extended_Pictographic}/u;
+  const match = value.match(emojiRegex);
+
+  return match ? match[0] : "";
+}
+
 export function CollectionForm({
   initialValues,
   onSubmit,
@@ -45,6 +67,7 @@ export function CollectionForm({
   const [name, setName] = useState(initialValues?.name ?? "");
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [emoji, setEmoji] = useState(initialValues?.emoji ?? "");
+const [emojiOpen, setEmojiOpen] = useState(false);
   const [color, setColor] = useState(initialValues?.color ?? COLOR_PRESETS[0]);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -81,16 +104,39 @@ export function CollectionForm({
           <label htmlFor="collection-emoji" className="block text-sm font-medium text-foreground">
             Icon
           </label>
-          <input
-            id="collection-emoji"
-            type="text"
-            value={emoji}
-            onChange={(e) => setEmoji(e.target.value)}
-            placeholder="📚"
-            maxLength={8}
-            disabled={isSubmitting}
-            className={cn(inputClass, "text-center text-lg")}
-          />
+          <div className="relative">
+  <button
+    id="collection-emoji"
+    type="button"
+    onClick={() => setEmojiOpen((open) => !open)}
+    disabled={isSubmitting}
+    className={cn(
+      inputClass,
+      "flex items-center justify-between text-lg"
+    )}
+  >
+    <span>{emoji || "📚"}</span>
+    <span className="text-xs text-muted-foreground">⌄</span>
+  </button>
+
+  {emojiOpen && (
+    <div className="absolute z-50 mt-2 grid grid-cols-4 gap-2 rounded-md border bg-background p-2 shadow-md">
+      {EMOJI_PRESETS.map((item) => (
+        <button
+          key={item}
+          type="button"
+          onClick={() => {
+            setEmoji(item);
+            setEmojiOpen(false);
+          }}
+          className="flex size-8 items-center justify-center rounded-md text-lg hover:bg-accent"
+        >
+          {item}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
         </div>
         <div className="flex-1 space-y-1.5">
           <label htmlFor="collection-name" className="block text-sm font-medium text-foreground">
