@@ -1,5 +1,9 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { extractUrlMetadata } from "@/services/metadata";
+import type { SaveMetadata } from "@/lib/save-metadata";
 import type { Database } from "@/types/supabase";
+
+export type { SaveMetadata } from "@/lib/save-metadata";
 
 export type Save = Database["public"]["Tables"]["saves"]["Row"];
 
@@ -33,14 +37,30 @@ export async function createSave(
 ): Promise<SaveResult> {
   const supabase = await createSupabaseServerClient();
 
+  // Extraction failures resolve to an all-null object rather than throwing —
+  // metadata extraction must never block saving a URL.
+  const extracted = await extractUrlMetadata(input.url);
+
+  // Never overwrite a user-provided title. Only fill it in when the user
+  // left the field empty.
+  const resolvedTitle = input.title ?? extracted.title ?? null;
+
+  const metadata: SaveMetadata = {
+    extractedDescription: extracted.description,
+    image: extracted.image,
+    siteName: extracted.siteName,
+    favicon: extracted.favicon,
+  };
+
   const { data, error } = await supabase
     .from("saves")
     .insert({
       user_id: userId,
       type: "link",
       source_url: input.url,
-      title: input.title ?? null,
+      title: resolvedTitle,
       description: input.description ?? null,
+      metadata,
     })
     .select()
     .single();

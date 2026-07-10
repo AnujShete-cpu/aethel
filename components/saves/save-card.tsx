@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Trash2, ExternalLink, FolderInput } from "lucide-react";
 
 import type { Save } from "@/services/saves";
+import { getSaveMetadata } from "@/lib/save-metadata";
 
 type SaveCardProps = {
   save: Save;
@@ -13,8 +14,13 @@ type SaveCardProps = {
 
 export function SaveCard({ save, onDelete, onMoveClick }: SaveCardProps) {
   const [deleting, setDeleting] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [faviconFailed, setFaviconFailed] = useState(false);
 
+  const meta = getSaveMetadata(save);
   const displayTitle = save.title ?? save.source_url ?? "Untitled";
+  const domain = getDomain(save.source_url);
+  const displayDescription = save.description ?? meta.extractedDescription;
   const formattedDate = new Date(save.created_at).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -56,21 +62,47 @@ export function SaveCard({ save, onDelete, onMoveClick }: SaveCardProps) {
               href={save.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
-              <span className="max-w-xs truncate">{save.source_url}</span>
+              {meta.favicon && !faviconFailed && (
+                // eslint-disable-next-line @next/next/no-img-element -- external favicon, arbitrary domain, not eligible for next/image optimization
+                <img
+                  src={meta.favicon}
+                  alt=""
+                  width={14}
+                  height={14}
+                  className="size-3.5 shrink-0 rounded-sm"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={() => setFaviconFailed(true)}
+                />
+              )}
+              <span className="max-w-xs truncate">{domain ?? save.source_url}</span>
               <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
             </a>
           )}
 
-          {save.description && (
+          {displayDescription && (
             <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-              {save.description}
+              {displayDescription}
             </p>
           )}
 
           <p className="mt-2 text-xs text-muted-foreground/60">{formattedDate}</p>
         </div>
+
+        {/* Preview image */}
+        {meta.image && !imageFailed && (
+          // eslint-disable-next-line @next/next/no-img-element -- external preview image, arbitrary domain, not eligible for next/image optimization
+          <img
+            src={meta.image}
+            alt=""
+            className="h-16 w-24 shrink-0 rounded-md border border-border object-cover"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setImageFailed(true)}
+          />
+        )}
 
         {/* Actions */}
         <div className="flex shrink-0 items-center gap-1">
@@ -97,4 +129,13 @@ export function SaveCard({ save, onDelete, onMoveClick }: SaveCardProps) {
       </div>
     </article>
   );
+}
+
+function getDomain(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
 }
