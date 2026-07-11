@@ -46,9 +46,7 @@ export async function searchUserSaves(
       .from("saves")
       .select("*")
       .eq("user_id", userId)
-      .or(
-        `title.ilike.%${escapeForIlike(term)}%,source_url.ilike.%${escapeForIlike(term)}%,description.ilike.%${escapeForIlike(term)}%`
-      )
+      .or(buildSearchFilter(term))
       .order("created_at", { ascending: false });
 
     // Exclude any save that has at least one collection link.
@@ -94,9 +92,7 @@ export async function searchUserSaves(
       .select("*")
       .eq("user_id", userId)
       .in("id", saveIds)
-      .or(
-        `title.ilike.%${escapeForIlike(term)}%,source_url.ilike.%${escapeForIlike(term)}%,description.ilike.%${escapeForIlike(term)}%`
-      )
+      .or(buildSearchFilter(term))
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -112,9 +108,7 @@ export async function searchUserSaves(
     .from("saves")
     .select("*")
     .eq("user_id", userId)
-    .or(
-      `title.ilike.%${escapeForIlike(term)}%,source_url.ilike.%${escapeForIlike(term)}%,description.ilike.%${escapeForIlike(term)}%`
-    )
+    .or(buildSearchFilter(term))
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -123,6 +117,22 @@ export async function searchUserSaves(
   }
 
   return { data: data ?? [], error: null };
+}
+
+/**
+ * Builds the shared multi-column search filter string used by all three
+ * search paths below. Searches title, URL, notes, and now the extracted
+ * article content_text — so users can find saves by words that appear
+ * inside the actual page content, not just its title/URL/notes.
+ */
+function buildSearchFilter(term: string): string {
+  const escaped = escapeForIlike(term);
+  return [
+    `title.ilike.%${escaped}%`,
+    `source_url.ilike.%${escaped}%`,
+    `description.ilike.%${escaped}%`,
+    `content_text.ilike.%${escaped}%`,
+  ].join(",");
 }
 
 /**

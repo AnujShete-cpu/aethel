@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { extractUrlMetadata } from "@/services/metadata";
+import { extractPageContent } from "@/services/content-extractor";
 import type { SaveMetadata } from "@/lib/save-metadata";
 import type { Database } from "@/types/supabase";
 
@@ -41,6 +42,11 @@ export async function createSave(
   // metadata extraction must never block saving a URL.
   const extracted = await extractUrlMetadata(input.url);
 
+  // Same guarantee applies to content extraction: any failure here still
+  // results in a normal, successful save — just with content_status: "failed"
+  // rather than populated article text.
+  const content = await extractPageContent(input.url);
+
   // Never overwrite a user-provided title. Only fill it in when the user
   // left the field empty.
   const resolvedTitle = input.title ?? extracted.title ?? null;
@@ -61,6 +67,10 @@ export async function createSave(
       title: resolvedTitle,
       description: input.description ?? null,
       metadata,
+      content_text: content.contentText,
+      content_word_count: content.success ? content.wordCount : null,
+      content_extracted_at: content.extractedAt,
+      content_status: content.success ? "success" : "failed",
     })
     .select()
     .single();

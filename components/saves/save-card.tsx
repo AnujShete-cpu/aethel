@@ -88,7 +88,12 @@ export function SaveCard({ save, onDelete, onMoveClick }: SaveCardProps) {
             </p>
           )}
 
-          <p className="mt-2 text-xs text-muted-foreground/60">{formattedDate}</p>
+          <p className="mt-2 text-xs text-muted-foreground/60">
+            {formattedDate}
+            {save.content_status === "success" && save.content_word_count ? (
+              <> · {save.content_word_count.toLocaleString()} words captured</>
+            ) : null}
+          </p>
         </div>
 
         {/* Preview image */}
